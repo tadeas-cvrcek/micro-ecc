@@ -1631,4 +1631,33 @@ void uECC_point_mult(uECC_word_t *result,
     EccPoint_mult(result, point, p2[!carry], 0, curve->num_n_bits + 1, curve);
 }
 
+void uECC_point_add(uECC_word_t* p_result, const uECC_word_t* p_P, const uECC_word_t* p_Q, const uECC_Curve curve) {
+  const wordcount_t num_words = curve->num_words;
+  uECC_word_t P_x[uECC_MAX_WORDS];
+  uECC_word_t P_y[uECC_MAX_WORDS];
+  uECC_word_t Q_x[uECC_MAX_WORDS];
+  uECC_word_t Q_y[uECC_MAX_WORDS];
+
+  uECC_vli_set(P_x, p_P, num_words);
+  uECC_vli_set(P_y, p_P+ num_words, num_words);
+  uECC_vli_set(Q_x, p_Q, num_words);
+  uECC_vli_set(Q_y, p_Q + num_words, num_words);
+
+  XYcZ_add(P_x, P_y, Q_x, Q_y, curve);
+
+  /* Find final 1/Z value. */
+  uECC_word_t z[uECC_MAX_WORDS];
+  uECC_vli_modMult_fast(z, p_P, P_y, curve);
+  uECC_vli_modInv(z, z, curve->p, num_words);
+  uECC_vli_modMult_fast(z, z, P_x, curve);
+  uECC_vli_modMult_fast(z, z, p_P+num_words, curve);
+  /* End 1/Z calculation */
+
+  apply_z(Q_x, Q_y, z, curve);
+
+
+  uECC_vli_set(p_result, Q_x, num_words);
+  uECC_vli_set(p_result+num_words, Q_y, num_words);
+}
+
 #endif /* uECC_ENABLE_VLI_API */

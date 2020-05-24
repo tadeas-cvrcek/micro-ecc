@@ -157,6 +157,9 @@ void uECC_point_mult(uECC_word_t *result,
                      const uECC_word_t *scalar,
                      uECC_Curve curve);
 
+/* Addition of two points. */
+void uECC_point_add(uECC_word_t* p_result, const uECC_word_t* p_P, const  uECC_word_t* p_Q, const uECC_Curve curve);
+
 /* Generates a random integer in the range 0 < random < top.
    Both random and top have num_words words. */
 int uECC_generate_random_int(uECC_word_t *random,
